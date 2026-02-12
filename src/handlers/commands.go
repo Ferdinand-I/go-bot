@@ -16,9 +16,8 @@ func StartCommandHandler(ctx context.Context, b *bot.Bot, update *models.Update)
 			Text:   "Hello, now you are in my DB! 😈",
 		},
 	)
-
 	if err != nil {
-		log.Panic(err)
+		log.Printf("failed to send start message: %v", err)
 	}
 }
 
@@ -27,10 +26,10 @@ func HelpCommandHandler(ctx context.Context, b *bot.Bot, update *models.Update) 
 		ctx,
 		&bot.SendMessageParams{
 			ChatID: update.Message.Chat.ID,
-			Text:   "Help message"},
+			Text:   "Help message",
+		},
 	)
-
 	if err != nil {
-		log.Panic(err)
+		log.Printf("failed to send help message: %v", err)
 	}
 }

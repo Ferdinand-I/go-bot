@@ -3,33 +3,42 @@ package bot
 import (
 	"context"
 	"learning_bot/misc"
-	"learning_bot/storage/db_models"
+	"learning_bot/storage/dbmodels"
+	"log"
 
 	"github.com/go-telegram/bot"
 	"github.com/go-telegram/bot/models"
-	"github.com/jmoiron/sqlx"
 )
 
 // CollectUserIfNotExists middleware checks if the user exists in the database and creates a new user if not.
 func CollectUserIfNotExists(next bot.HandlerFunc) bot.HandlerFunc {
 	return func(ctx context.Context, b *bot.Bot, update *models.Update) {
+		if update.Message == nil || update.Message.From == nil {
+			next(ctx, b, update)
+			return
+		}
+
 		db := misc.DBFromCtx(ctx)
+		from := update.Message.From
+		userRepo := &dbmodels.UserRepo{DB: db}
 
-		go func(db *sqlx.DB, update *models.Update) {
-			user := db_models.GetUserByTgID(db, update.Message.From.ID)
+		exists, err := userRepo.TgUserExists(from.ID)
+		if err != nil {
+			log.Printf("failed to check user existing: %v", err)
+			next(ctx, b, update)
+			return
+		}
 
-			if user == nil {
-				err := db_models.CreateUser(
-					db,
-					&db_models.User{
-						TGID:      update.Message.From.ID,
-						FirstName: update.Message.From.FirstName,
-						Username:  update.Message.From.Username,
-					},
-				)
-				misc.Must(err)
+		if !exists {
+			err := userRepo.Create(&dbmodels.User{
+				TGID:      from.ID,
+				FirstName: from.FirstName,
+				Username:  from.Username,
+			})
+			if err != nil {
+				log.Printf("failed to create user: %v", err)
 			}
-		}(db, update)
+		}
 
 		next(ctx, b, update)
 	}

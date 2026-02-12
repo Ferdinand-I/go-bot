@@ -40,8 +40,8 @@ type Config struct {
 	DBConfig  DBConfig
 }
 
-func (cfg *DBConfig) BuildDSN() (string, error) {
-	dsn := fmt.Sprintf(
+func (cfg *DBConfig) BuildDSN() string {
+	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		cfg.User,
 		cfg.Password,
@@ -49,8 +49,6 @@ func (cfg *DBConfig) BuildDSN() (string, error) {
 		cfg.Port,
 		cfg.DBName,
 	)
-
-	return dsn, nil
 }
 
 func loadDotenvCfg(path string) {

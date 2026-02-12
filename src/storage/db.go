@@ -9,9 +9,7 @@ import (
 )
 
 func ConnectDB(cfg core.DBConfig) *sqlx.DB {
-	dsn, err := cfg.BuildDSN()
-
-	misc.Must(err)
+	dsn := cfg.BuildDSN()
 
 	db, err := sqlx.Connect("postgres", dsn)
 	misc.Must(err)

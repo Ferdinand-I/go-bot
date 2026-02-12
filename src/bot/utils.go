@@ -17,12 +17,13 @@ func SetupBot(ctx context.Context) *bot.Bot {
 	)
 	misc.Must(err)
 
-	wh_info, err := b.GetWebhookInfo(ctx)
+	whInfo, err := b.GetWebhookInfo(ctx)
 	misc.Must(err)
 
-	if wh_info.URL != "" {
-		b.DeleteWebhook(ctx, &bot.DeleteWebhookParams{DropPendingUpdates: true})
+	if whInfo.URL != "" {
+		_, _ = b.DeleteWebhook(ctx, &bot.DeleteWebhookParams{DropPendingUpdates: true})
 	}
+
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, handlers.StartCommandHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/help", bot.MatchTypeExact, handlers.HelpCommandHandler)
 

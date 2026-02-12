@@ -6,14 +6,21 @@ import (
 	"learning_bot/core"
 	"learning_bot/misc"
 	"learning_bot/storage"
+	"log"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
 	db := storage.ConnectDB(core.Cfg.DBConfig)
 	defer db.Close()
 
-	ctx := context.Context(misc.NewContext(context.Background(), db))
+	ctx := misc.NewContext(context.Background(), db)
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
 	b := bot.SetupBot(ctx)
 
+	log.Println("bot started")
 	b.Start(ctx)
 }
