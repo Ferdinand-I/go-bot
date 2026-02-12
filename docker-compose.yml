@@ -1,4 +1,17 @@
 services:
+  bot:
+    container_name: bot-go-bot
+    build:
+      context: ./src
+      dockerfile: ../Dockerfile
+    env_file:
+      - .env
+    environment:
+      ENVIRONMENT: PRODUCTION
+    depends_on:
+      db:
+        condition: service_healthy
+
   db:
     container_name: db-go-bot
     image: postgres
@@ -10,3 +23,8 @@ services:
       POSTGRES_DB: $DB_NAME
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $DB_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5

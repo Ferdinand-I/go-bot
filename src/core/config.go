@@ -3,10 +3,25 @@ package core
 import (
 	"fmt"
 	"learning_bot/misc"
+	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/kelseyhightower/envconfig"
 )
+
+type Env int
+
+const (
+	Local Env = iota
+	Development
+	Production
+)
+
+var EnvMap = map[string]Env{
+	"LOCAL": Local,
+	"DEVELOPMENT": Development,
+	"PRODUCTION": Production,
+}
 
 type BotConfig struct {
 	Token string `envconfig:"BOT_TOKEN" required:"true"`
@@ -38,19 +53,26 @@ func (cfg *DBConfig) BuildDSN() (string, error) {
 	return dsn, nil
 }
 
-func loadDotenvCfg() {
-	misc.Must(godotenv.Load())
+func loadDotenvCfg(path string) {
+	misc.Must(godotenv.Load(path))
 }
 
 func buildCfg() Config {
-	loadDotenvCfg()
+	env := os.Getenv("ENVIRONMENT")
+	if env == "" {
+		panic("Must set ENVIRONMENT")
+	}
+
+	if EnvMap[env] == Local {
+		loadDotenvCfg("../.env")
+	}
 
 	var BotCfg BotConfig
 	var DBCfg DBConfig
 
 	misc.Must(envconfig.Process("", &BotCfg))
 	misc.Must(envconfig.Process("", &DBCfg))
-	
+
 	return Config{
 		BotConfig: BotCfg,
 		DBConfig:  DBCfg,
