@@ -1,9 +1,11 @@
-package bot
+package utils
 
 import (
 	"context"
+
+	botpkg "learning_bot/bot"
+	"learning_bot/bot/handlers"
 	"learning_bot/core"
-	"learning_bot/handlers"
 	"learning_bot/misc"
 
 	"github.com/go-telegram/bot"
@@ -13,7 +15,7 @@ func SetupBot(ctx context.Context) *bot.Bot {
 	b, err := bot.New(
 		core.Cfg.BotConfig.Token,
 		bot.WithDefaultHandler(handlers.DefaultHandler),
-		bot.WithMiddlewares(CollectUserIfNotExists),
+		bot.WithMiddlewares(botpkg.CollectUserIfNotExists),
 	)
 	misc.Must(err)
 
@@ -26,6 +28,9 @@ func SetupBot(ctx context.Context) *bot.Bot {
 
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/start", bot.MatchTypeExact, handlers.StartCommandHandler)
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/help", bot.MatchTypeExact, handlers.HelpCommandHandler)
+	b.RegisterHandlerMatchFunc(handlers.ContainsPhoto, handlers.PhotoMessageHandler)
+	b.RegisterHandlerMatchFunc(handlers.DeleteMessageCQ, handlers.DeleteMessageCQHandler)
+	b.RegisterHandlerMatchFunc(handlers.PinMessageCQ, handlers.PinMessageCQHandler)
 
 	return b
 }

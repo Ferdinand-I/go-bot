@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"learning_bot/bot"
+	"learning_bot/bot/utils"
 	"learning_bot/core"
 	"learning_bot/misc"
 	"learning_bot/storage"
@@ -19,7 +19,7 @@ func main() {
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	b := bot.SetupBot(ctx)
+	b := utils.SetupBot(ctx)
 
 	log.Println("bot started")
 	b.Start(ctx)
