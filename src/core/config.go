@@ -18,9 +18,9 @@ const (
 )
 
 var EnvMap = map[string]Env{
-	"LOCAL": Local,
+	"LOCAL":       Local,
 	"DEVELOPMENT": Development,
-	"PRODUCTION": Production,
+	"PRODUCTION":  Production,
 }
 
 type BotConfig struct {

@@ -4,21 +4,21 @@ import (
 	"context"
 	"learning_bot/core"
 	"learning_bot/handlers"
-	"log"
+	"learning_bot/misc"
 
 	"github.com/go-telegram/bot"
 )
 
 func SetupBot(ctx context.Context) *bot.Bot {
-	b, err := bot.New(core.Cfg.BotConfig.Token, bot.WithDefaultHandler(handlers.DefaultHandler))
-	if err != nil {
-		log.Fatal(err)
-	}
+	b, err := bot.New(
+		core.Cfg.BotConfig.Token,
+		bot.WithDefaultHandler(handlers.DefaultHandler),
+		bot.WithMiddlewares(CollectUserIfNotExists),
+	)
+	misc.Must(err)
 
 	wh_info, err := b.GetWebhookInfo(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
+	misc.Must(err)
 
 	if wh_info.URL != "" {
 		b.DeleteWebhook(ctx, &bot.DeleteWebhookParams{DropPendingUpdates: true})

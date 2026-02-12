@@ -18,7 +18,9 @@ func GetUserByTgID(db *sqlx.DB, ID int64) *User {
 
 	err := db.Get(user, "SELECT * FROM users WHERE tg_id = $1", ID)
 	if err != nil {
-		log.Print(err.Error())
+		if err.Error() != "sql: no rows in result set" {
+			log.Print(err.Error())
+		}
 
 		return nil
 	}
