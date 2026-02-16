@@ -12,7 +12,7 @@ RUN go mod download
 COPY . .
 
 # Build for Linux
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o tg_bot main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o tg_bot ./cmd/bot
 
 # -------------------------
 # Stage 2: Minimal runtime

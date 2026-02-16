@@ -1,4 +1,4 @@
-package handlers
+package handler
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"github.com/go-telegram/bot/models"
 )
 
-func PhotoMessageHandler(ctx context.Context, b *bot.Bot, update *models.Update) {
+func (h *Handler) PhotoMessage(ctx context.Context, b *bot.Bot, update *models.Update) {
 	kb := &models.InlineKeyboardMarkup{
 		InlineKeyboard: [][]models.InlineKeyboardButton{
 			{
@@ -17,7 +17,8 @@ func PhotoMessageHandler(ctx context.Context, b *bot.Bot, update *models.Update)
 					Text:         "Удали сейчас же!",
 					CallbackData: fmt.Sprintf("deleteMessage:%d:%d", update.Message.Chat.ID, update.Message.ID),
 				},
-			}, {
+			},
+			{
 				{
 					Text:         "Кинь в закреп!",
 					CallbackData: fmt.Sprintf("pinMessage:%d:%d", update.Message.Chat.ID, update.Message.ID),
@@ -26,15 +27,12 @@ func PhotoMessageHandler(ctx context.Context, b *bot.Bot, update *models.Update)
 		},
 	}
 
-	_, err := b.SendMessage(
-		ctx,
-		&bot.SendMessageParams{
-			ChatID:      update.Message.Chat.ID,
-			Text:        "I recieved a photo from you! What do you want me to do with it?",
-			ReplyMarkup: kb,
-		},
-	)
+	_, err := b.SendMessage(ctx, &bot.SendMessageParams{
+		ChatID:      update.Message.Chat.ID,
+		Text:        "I recieved a photo from you! What do you want me to do with it?",
+		ReplyMarkup: kb,
+	})
 	if err != nil {
-		log.Print("Error while sending message")
+		log.Printf("failed to send photo message: %v", err)
 	}
 }

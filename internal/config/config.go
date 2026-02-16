@@ -1,8 +1,7 @@
-package core
+package config
 
 import (
 	"fmt"
-	"learning_bot/misc"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -17,17 +16,17 @@ const (
 	Production
 )
 
-var EnvMap = map[string]Env{
+var envMap = map[string]Env{
 	"LOCAL":       Local,
 	"DEVELOPMENT": Development,
 	"PRODUCTION":  Production,
 }
 
-type BotConfig struct {
+type Bot struct {
 	Token string `envconfig:"BOT_TOKEN" required:"true"`
 }
 
-type DBConfig struct {
+type DB struct {
 	Host     string `envconfig:"DB_HOST" required:"true"`
 	Port     int    `envconfig:"DB_PORT" required:"true"`
 	User     string `envconfig:"DB_USER" required:"true"`
@@ -36,11 +35,11 @@ type DBConfig struct {
 }
 
 type Config struct {
-	BotConfig BotConfig
-	DBConfig  DBConfig
+	Bot Bot
+	DB  DB
 }
 
-func (cfg *DBConfig) BuildDSN() string {
+func (cfg *DB) DSN() string {
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=disable",
 		cfg.User,
@@ -51,30 +50,30 @@ func (cfg *DBConfig) BuildDSN() string {
 	)
 }
 
-func loadDotenvCfg(path string) {
-	misc.Must(godotenv.Load(path))
-}
-
-func buildCfg() Config {
+func Load() (*Config, error) {
 	env := os.Getenv("ENVIRONMENT")
 	if env == "" {
-		panic("Must set ENVIRONMENT")
+		return nil, fmt.Errorf("ENVIRONMENT is not set")
 	}
 
-	if EnvMap[env] == Local {
-		loadDotenvCfg("../.env")
+	if envMap[env] == Local {
+		if err := godotenv.Load(".env"); err != nil {
+			return nil, fmt.Errorf("loading .env: %w", err)
+		}
 	}
 
-	var BotCfg BotConfig
-	var DBCfg DBConfig
-
-	misc.Must(envconfig.Process("", &BotCfg))
-	misc.Must(envconfig.Process("", &DBCfg))
-
-	return Config{
-		BotConfig: BotCfg,
-		DBConfig:  DBCfg,
+	var botCfg Bot
+	if err := envconfig.Process("", &botCfg); err != nil {
+		return nil, fmt.Errorf("processing bot config: %w", err)
 	}
+
+	var dbCfg DB
+	if err := envconfig.Process("", &dbCfg); err != nil {
+		return nil, fmt.Errorf("processing db config: %w", err)
+	}
+
+	return &Config{
+		Bot: botCfg,
+		DB:  dbCfg,
+	}, nil
 }
-
-var Cfg = buildCfg()

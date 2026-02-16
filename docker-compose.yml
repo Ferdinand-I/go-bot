@@ -2,8 +2,8 @@ services:
   bot:
     container_name: bot-go-bot
     build:
-      context: ./src
-      dockerfile: ../Dockerfile
+      context: .
+      dockerfile: Dockerfile
     env_file:
       - .env
     environment:

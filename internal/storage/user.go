@@ -1,4 +1,4 @@
-package dbmodels
+package storage
 
 import (
 	"database/sql"
@@ -18,6 +18,10 @@ type UserRepo struct {
 	DB *sqlx.DB
 }
 
+func NewUserRepo(db *sqlx.DB) *UserRepo {
+	return &UserRepo{DB: db}
+}
+
 func (r *UserRepo) TgUserExists(id int64) (bool, error) {
 	var exists bool
 
@@ -33,6 +37,9 @@ func (r *UserRepo) TgUserExists(id int64) (bool, error) {
 }
 
 func (r *UserRepo) Create(user *User) error {
-	_, err := r.DB.NamedExec("INSERT INTO users (tg_id, first_name, username) VALUES (:tg_id, :first_name, :username)", user)
+	_, err := r.DB.NamedExec(
+		"INSERT INTO users (tg_id, first_name, username) VALUES (:tg_id, :first_name, :username)",
+		user,
+	)
 	return err
 }
